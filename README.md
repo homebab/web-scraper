@@ -17,7 +17,7 @@
 brew install chromedriver
 brew install Caskroom/versions/google-chrome-canary
 ```
-- set environment variable `$CHORME_DRIVER`. ex `usr/local/bin/chromedriver`
+- set environment variable `$CHORME_DRIVER`. ex `/usr/local/bin/chromedriver`
 - aws configure with ur IAM Key
 ```shell script
 # if you don't have awscli, pip install awscli
