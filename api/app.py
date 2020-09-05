@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request, render_template
 
-from crawler.items import HaemukItemScraper, EmartItemScraper
-from crawler.recipes import MangaeRecipeScraper, HaemukRecipeScraper
+from scrapers.categories import CoupangItemCategoriesScraper, HaemukItemCategoriesScraper
+from scrapers.items import EmartItemScraper
+from scrapers.recipes import MangaeRecipeScraper, HaemukRecipeScraper
 from utils.logging import init_logger
 from utils.s3_manager.manage import S3Manager
 
@@ -24,6 +25,7 @@ def main():
     @app.route('/scrap-recipes/<source>', methods=['GET'])
     def scrap_recipes(source):
         """
+        get recipes info for recipe recommendation
         :return: jsonified recipe
         """
         args = request.args
@@ -63,21 +65,15 @@ def main():
     @app.route('/scrap-items/<source>', methods=['GET'])
     def scrap_items(source):
         """
-        :return: jsonified recipe
+        get items info for food ingredients sales
+        :return: jsonified items
         """
-        logger.info("let's scrap item categories {source} recipes".format(source=source))
+        logger.info("let's scrap {source} items".format(source=source))
 
-        key = "{prefix}}/items/{source}".format(prefix=prefix, source=source)
+        key = "{prefix}/items/{source}".format(prefix=prefix, source=source)
         head = True
 
-        if source == "haemuk":
-            result = HaemukItemScraper(
-                base_url="https://www.haemukja.com/refrigerator",
-                bucket_name=bucket_name,
-                key=key,
-                head=head
-            ).process()
-        elif source == "emart":
+        if source == "emart":
             result = EmartItemScraper(
                 base_url="http://emart.ssg.com/",
                 bucket_name=bucket_name,
@@ -89,15 +85,46 @@ def main():
 
         return jsonify(result)
 
+    @app.route('/scrap-item-categories/<source>', methods=['GET'])
+    def get_item_categories(source):
+        """
+        get item categories info for ingredients classification
+        :return: jsonified recipe
+        """
+
+        logger.info("let's scrap {source} item categories".format(source=source))
+
+        key = "{prefix}/items/{source}".format(prefix=prefix, source=source)
+        head = True
+
+        if source == "haemuk":
+            result = HaemukItemCategoriesScraper(
+                base_url="https://www.haemukja.com/refrigerator",
+                bucket_name=bucket_name,
+                key=key,
+                head=head
+            ).process()
+        elif source == "coupang":
+            result = CoupangItemCategoriesScraper(
+                base_url="https://www.coupang.com/np/categories/393760",
+                bucket_name=bucket_name,
+                key=key,
+                head=head
+            ).process()
+        else:
+            raise NotImplementedError
+
+        return jsonify(result)
+
     @app.route('/<target>/<source>', methods=['GET'])
-    def get_recipes(target, source):
+    def get(target, source):
         data = S3Manager(bucket_name=bucket_name).fetch_dict_from_json(
             key="{prefix}/{target}/{source}".format(prefix=prefix, target=target, source=source))
         if data is None:
             return 'there is no data'
         return jsonify(data)
 
-    app.run(host='0.0.0.0', port=9000, debug=True)
+    app.run(host='localhost', port=9000, debug=True)
 
 
 if __name__ == '__main__':

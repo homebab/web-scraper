@@ -1,11 +1,12 @@
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
-from crawler.ancestor import SeleniumScraper
+from scrapers.ancestor import SeleniumScraper
 
 
-class ItemScraper(SeleniumScraper):
+class ItemCategoriesScraper(SeleniumScraper):
     """
         To crawl item categories
 
@@ -27,10 +28,10 @@ class ItemScraper(SeleniumScraper):
         :return: items
         """
         items = self.crawl()
-        self.s3_manager.save_dict_to_json(
-            data=items,
-            key="{prefix}/{name}.json".format(prefix=self.prefix, name="item_categories")
-        )
+        # self.s3_manager.save_dict_to_json(
+        #     data=items,
+        #     key="{prefix}/{name}.json".format(prefix=self.prefix, name="item_categories")
+        # )
         self.driver.quit()
         return items
 
@@ -54,7 +55,7 @@ class ItemScraper(SeleniumScraper):
         pass
 
 
-class HaemukItemScraper(ItemScraper):
+class HaemukItemCategoriesScraper(ItemCategoriesScraper):
     """
         - Recipe Providing Service-
         https://www.haemukja.com/refrigerator
@@ -87,29 +88,47 @@ class HaemukItemScraper(ItemScraper):
         return dict(map(make_tuple, parents))
 
 
-class EmartItemScraper(ItemScraper):
+class CoupangItemCategoriesScraper(ItemCategoriesScraper):
     """
         - Online Grocery Shop -
-         http://emart.ssg.com/
+        https://www.coupang.com/np/categories/393760
 
-         grand parent - parent - children
+
     """
 
     def __init__(self, base_url, bucket_name, key, head):
         super().__init__(base_url, bucket_name, key, head)
 
-    def get_item_categories(self):
-        """
-            grand parent:
-                    parent:
-                         children
-        :return:
-        """
-        mother = self.driver.find_element_by_class_name('em_lnb_lst')
+    def get_item_categories(self) -> dict:
+        root = self.driver.find_element_by_id('searchCategoryComponent')
+        container = []
+        self.recursive(root, container)
+        return
 
-        mother.find_element_by_class_name('emlnb_top_lnk')
-        mother.find_element_by_class_name('emlnb_sub_lv2')
-        raise NotImplementedError
+    def recursive(self, root, stack):
+        stack.append(root.text.replace("\n열림", ""))
+        print("stack: ", stack[1:])
 
-    def dig_structure(self):
-        pass
+        try:
+            root = root.find_element_by_tag_name('ul')
+        except NoSuchElementException:
+            print('no ul element of root')
+            stack.pop()
+            return
+
+        children = WebDriverWait(self.driver, 1).until(
+            lambda driver: root.find_elements_by_tag_name('li')
+        )
+        for ele in children:
+            try:
+                WebDriverWait(self.driver, 5).until(
+                    expected_conditions.element_to_be_clickable(By.TAG_NAME('a'))
+                    # lambda driver: ele.find_element_by_tag_name('a')
+                )
+                ele.find_element_by_tag_name('a').click()
+            except TimeoutException:
+                print("no a tag of li")
+
+            self.recursive(ele, stack)
+
+        stack.pop()
