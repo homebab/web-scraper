@@ -4,3 +4,5 @@ __pycache__
 *.json
 *.log
 venv
+
+.DS_Store
