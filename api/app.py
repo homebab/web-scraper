@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, request, render_template
 
-from scrapers.categories import CoupangItemCategoriesScraper, HaemukItemCategoriesScraper
-from scrapers.items import EmartItemScraper
-from scrapers.recipes import MangaeRecipeScraper, HaemukRecipeScraper
+from scrapers.item_categories import HaemukItemCategoriesScraper, CoupangItemCategoriesScraper
+from scrapers.item_price import EmartItemScraper
+from scrapers.general_recipes import MangaeRecipeScraper, HaemukRecipeScraper
 from utils.logging import init_logger
 from utils.s3_manager.manage import S3Manager
 
