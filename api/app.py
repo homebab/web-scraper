@@ -49,30 +49,26 @@ def main():
                 base_url="https://www.haemukja.com/refrigerator",
                 bucket_name=bucket_name,
                 key=key,
-                head=head
+                headless=head
             ).process()
         elif source == "coupang":
             result = CoupangItemCategoriesScraper(
                 base_url="https://www.coupang.com/np/categories/393760",
                 bucket_name=bucket_name,
                 key=key,
-                head=head
+                headless=head
             ).process()
         else:
             raise NotImplementedError
 
         return jsonify(result)
 
-    @app.route('/<target>/<source>', methods=['GET'])
-    def get(target, source):
-        data = S3Manager(bucket_name=bucket_name).fetch_dict_from_json(
-            key="{prefix}/{target}/{source}".format(prefix=prefix, target=target, source=source))
-        if data is None:
-            return 'there is no data'
-        return jsonify(data)
+    # @app.route('/<target>/<source>', methods=['GET'])
+    # def get(target, source):
+    #     data = S3Manager(bucket_name=bucket_name).fetch_dict_from_json(
+    #         key="{prefix}/{target}/{source}".format(prefix=prefix, target=target, source=source))
+    #     if data is None:
+    #         return 'there is no data'
+    #     return jsonify(data)
 
     app.run(host='localhost', port=9000, debug=True)
-
-
-if __name__ == '__main__':
-    main()

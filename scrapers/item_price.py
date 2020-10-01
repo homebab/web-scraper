@@ -4,8 +4,8 @@ from scrapers.ancestor import SeleniumScraper
 
 
 class ItemScraper(SeleniumScraper):
-    def __init__(self, base_url, bucket_name, key, head):
-        super().__init__(base_url, bucket_name, key, head)
+    def __init__(self, base_url, bucket_name, key, headless):
+        super().__init__(base_url, bucket_name, key, headless)
 
     def process(self):
         raise NotImplementedError
@@ -19,6 +19,6 @@ class EmartItemScraper(ItemScraper, ABC):
          grand parent - parent - children
     """
 
-    def __init__(self, base_url, bucket_name, key, head):
-        super().__init__(base_url, bucket_name, key, head)
+    def __init__(self, base_url, bucket_name, key, headless):
+        super().__init__(base_url, bucket_name, key, headless)
 

@@ -17,8 +17,8 @@ class ItemCategoriesScraper(SeleniumScraper):
             Based on online grocery shop
     """
 
-    def __init__(self, base_url, bucket_name, key, head):
-        super().__init__(base_url, bucket_name, key, head)
+    def __init__(self, base_url, bucket_name, key, headless):
+        super().__init__(base_url, bucket_name, key, headless)
 
     def process(self) -> dict:
         """
@@ -63,8 +63,8 @@ class HaemukItemCategoriesScraper(ItemCategoriesScraper):
         parent - children
     """
 
-    def __init__(self, base_url, bucket_name, key, head):
-        super().__init__(base_url, bucket_name, key, head)
+    def __init__(self, base_url, bucket_name, key, headless):
+        super().__init__(base_url, bucket_name, key, headless)
 
     def get_item_categories(self) -> dict:
         """
@@ -96,8 +96,8 @@ class CoupangItemCategoriesScraper(ItemCategoriesScraper):
 
     """
 
-    def __init__(self, base_url, bucket_name, key, head):
-        super().__init__(base_url, bucket_name, key, head)
+    def __init__(self, base_url, bucket_name, key, headless):
+        super().__init__(base_url, bucket_name, key, headless)
 
     def get_item_categories(self) -> dict:
         root = self.driver.find_element_by_id('searchCategoryComponent')

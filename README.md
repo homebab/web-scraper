@@ -11,7 +11,11 @@
 ```
 
 ## Get Started
-### on Mac
+swagger: http://localhost:9000/
+```
+python api/app.py
+```
+### setup on Mac
 - install chromedriver
 ```shell script
 brew install chromedriver

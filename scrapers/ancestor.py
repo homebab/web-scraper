@@ -7,7 +7,7 @@ from utils.s3_manager.manage import S3Manager
 
 
 class SeleniumScraper:
-    def __init__(self, base_url, bucket_name, key, head=False):
+    def __init__(self, base_url, bucket_name, key, headless=False):
         self.logger = init_logger()
 
         self.bucket_name = bucket_name
@@ -16,7 +16,7 @@ class SeleniumScraper:
 
         self.chrome_path = os.environ['CHROME_DRIVER']
         options = webdriver.ChromeOptions()
-        if head is False:
+        if headless is True:
             options.add_argument('headless')
 
         self.driver = webdriver.Chrome(executable_path=self.chrome_path, chrome_options=options)

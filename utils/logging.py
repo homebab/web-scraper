@@ -5,7 +5,7 @@ import yaml
 
 
 def init_logger(name='__main__'):
-    config_path = '../config/logging.yaml'
+    config_path = 'config/logging.yaml'
 
     with open(config_path) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
