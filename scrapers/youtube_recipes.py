@@ -43,5 +43,36 @@ class YoutubeRecipeScraper(SeleniumScraper):
         self.driver.quit()
         return recipes
 
-    def crawl(self):
-        return dict()
+    def crawl(self) -> dict:
+        """
+            1. connection
+            2. get recipes
+        :return: item_categories
+        """
+        self.connection()
+        return self.get_recipes()
+
+    def connection(self) -> None:
+        self.driver.get(self.base_url)
+        self.logger.debug("success to connect with '{url}'".format(url=self.base_url))
+
+    def get_recipes(self) -> dict:
+        """
+            event(click) <-> get_items
+        """
+        pass
+
+
+class BaekRecipeScraper(YoutubeRecipeScraper):
+    def __init__(self, base_url, bucket_name, key):
+        """
+        :param base_url: 'https://www.youtube.com/watch?v=v32NjYn5pSc&list=PLoABXt5mipg4vxLw0NsRQLDDVBpOkshzF&index=1'
+        :param bucket_name: 'omtm-app-service
+        :param key:
+        """
+        super().__init__(base_url, bucket_name, key)
+
+        def get_recipes(self) -> dict:
+            return dict()
+
+
