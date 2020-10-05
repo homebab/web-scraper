@@ -44,7 +44,7 @@ class S3Manager:
         filtered = list(filter(lambda o: o.size > 0 and conversion_type in o.key, objs_list))
 
         def convert(c_type):
-            return{
+            return {
                 "csv": lambda obj: pd.read_csv(StringIO(obj.get()['Body'].read().decode('euc-kr')), header=0),
                 "json": lambda obj: json.loads(obj.get()['Body'].read().decode('utf-8'))
             }[c_type]
@@ -89,8 +89,8 @@ class S3Manager:
             ))
             return True
 
-    def save_dict_to_json(self, data: dict, key: str):
-        serialized_data = json.dumps(data, ensure_ascii=False)
+    def save_dict_to_json(self, data: dict, key: str, encoder=None):
+        serialized_data = json.dumps(data, ensure_ascii=False, cls=encoder)
         return self.save_object(key=key, body=serialized_data)
 
     def save_df_to_csv(self, df: pd.DataFrame, key: str):
@@ -126,4 +126,3 @@ class S3Manager:
         code = self.save_object(body=img_data, key=key)
         plt.figure()
         return code
-

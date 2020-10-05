@@ -1,8 +1,11 @@
+import json
+
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, abort
 
 from scrapers.general_recipes import MangaeRecipeScraper
-from scrapers.youtube_recipes import BaekRecipeScraper
+from scrapers.youtube_recipes import BaekRecipeScraper, YoutubeDataAPIHandler
+from utils.encoder import DateTimeEncoder
 from utils.logging import init_logger
 from utils.s3_manager.manage import S3Manager
 
@@ -10,6 +13,60 @@ Recipe = Namespace(
     name="Recipes",
     description="Scrape recipes on web",
 )
+
+
+@Recipe.route('/youtube')
+class YoutubeRecipe(Resource):
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.logger = init_logger()
+
+        self.bucket_name = 'omtm-production'
+        self.key = lambda s: "scraper/youtube_recipes/{source}.json".format(source=s)
+
+    def validate_arg(self, key):
+        try:
+            return request.args[key]
+        except KeyError:
+            self.logger.debug('[omtm]: no query parameter')
+            raise KeyError
+
+    @Recipe.doc(params={
+        'playlist-id': {
+            'format': 'string',
+            'description': 'youtube playlist id'
+        }
+    })
+    def get(self):
+        """ get youtube recipes from s3 """
+        playlist_id = self.validate_arg(key='playlist-id')
+
+        data = S3Manager(bucket_name=self.bucket_name).fetch_dict_from_json(key=self.key(s=playlist_id))
+        if data is None:
+            return 'there is no data'
+        return data
+
+    @Recipe.doc(params={
+        'playlist-id': {
+            'format': 'string',
+            'description': 'youtube playlist id'
+        }
+    })
+    def post(self):
+        """ scrape and upload youtube recipes to s3 """
+
+        playlist_id = self.validate_arg(key='playlist-id')
+
+        res = YoutubeDataAPIHandler(
+            bucket_name=self.bucket_name,
+            key=self.key(s=playlist_id),
+        ).process(
+            playlist_id=playlist_id
+        )
+
+        return json.dumps(res, cls=DateTimeEncoder)
 
 
 @Recipe.route('/baek')
@@ -20,7 +77,7 @@ class BaekRecipe(Resource):
         self.source = 'baek'
         self.logger = init_logger()
 
-        self.bucket_name = 'omtm_production'
+        self.bucket_name = 'omtm-production'
         self.key = "scraper/recipes/{source}".format(source=self.source)
 
     def get(self):
@@ -84,7 +141,7 @@ class MangaeRecipe(Resource):
 
         self.candidate_num = range(int(str_num), int(end_num))
         self.field = ['title', 'items', "duration", "tags"]
-        self.bucket_name = 'omtm_production'
+        self.bucket_name = 'omtm-production'
         self.key = "scraper/recipes/{source}".format(source=self.source)
 
     def get(self):
@@ -122,7 +179,7 @@ class HaemukRecipe(Resource):
 
         self.candidate_num = range(int(str_num), int(end_num))
         self.field = ['title', 'items', "duration", "tags"]
-        self.bucket_name = 'omtm_production'
+        self.bucket_name = 'omtm-production'
         self.key = "scraper/recipes/{source}".format(source=self.source)
 
     def get(self):

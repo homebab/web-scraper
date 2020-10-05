@@ -1,5 +1,6 @@
 import json
 import multiprocessing as mp
+import os
 import re
 import uuid
 from datetime import datetime
@@ -17,6 +18,8 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
 from scrapers.ancestor import SeleniumScraper
+from utils.encoder import DateTimeEncoder
+from utils.s3_manager.manage import S3Manager
 
 
 class YoutubeRecipeScraper(SeleniumScraper):
@@ -199,7 +202,6 @@ class BaekRecipeScraper(YoutubeRecipeScraper):
         """
 
         result = filter(lambda d: None not in d, map(self.get_recipe, self.targets))
-        print(list(result))
 
         # with mp.Pool(mp.cpu_count()) as p:
         #     result = p.map(self.worker, targets)
@@ -212,14 +214,140 @@ class BaekRecipeScraper(YoutubeRecipeScraper):
             'recipes': list(result)
         }
 
-    if __name__ == '__main__':
-        a = load('../resources/targets')
-        print(len(a))
-        print(list(filter(lambda x: None in x, a)))
 
-        print(dict([(1, 2), (3, 4)]))
+class YoutubeDataAPIHandler:
+    """
+        Youtube Data API - 'https://developers.google.com/youtube/v3/docs'
 
-        # print({1:2} + {1:2})
-        print(''.join(filter(lambda c: c.isdigit(), '조회수 1,234,512회')))
+        Response Type:
+        {
+          "kind": "youtube#playlistItemListResponse",
+          "etag": etag,
+          "nextPageToken": string,
+          "prevPageToken": string,
+          "pageInfo": {
+            "totalResults": integer,
+            "resultsPerPage": integer
+          },
+          "items": [
+            playlistItem Resource - 'https://developers.google.com/youtube/v3/docs/playlistItems#resource'
+          ]
+        }
 
-        print(dict(zip([1, 2, 3], [12, 3, 4])))
+    """
+
+    def __init__(self, bucket_name, key):
+        self.base_url = 'https://www.googleapis.com/youtube/v3'
+        self.s3_manager = S3Manager(bucket_name=bucket_name)
+        self.key = key
+
+        pass
+
+    def process(self, playlist_id):
+        """
+            1. fetch items on the playlist from Youtube
+            2. transform response
+            3. upload to S3
+        :return:
+        """
+        items = self.fetch_playlist_items(playlist_id=playlist_id)
+        transformed = list(map(self.transform, items))
+        data = {
+            'created_at': datetime.now(),
+            'total_num': len(transformed),
+            'data': transformed
+        }
+        self.s3_manager.save_dict_to_json(data, key=self.key, encoder=DateTimeEncoder)
+        return data
+
+    @staticmethod
+    def transform(item):
+        """
+        Input Item Type: 'https://developers.google.com/youtube/v3/docs/playlistItems#resource'
+        {
+          "kind": "youtube#playlistItem",
+          "etag": etag,
+          "id": string,
+          "snippet": {
+            "publishedAt": datetime,
+            "channelId": string,
+            "title": string,
+            "description": string,
+            "thumbnails": {
+              (key): {
+                "url": string,
+                "width": unsigned integer,
+                "height": unsigned integer
+              }
+            },
+            "channelTitle": string,
+            "playlistId": string,
+            "position": unsigned integer,
+            "resourceId": {
+              "kind": string,
+              "videoId": string,
+            }
+          }
+        }
+        :return: {
+            id: UUID,
+            videoId -> external_id: string,
+            title: string,
+            description: string
+            thumbnails: Array,
+            publishedAt -> published_at: datetime,
+            channelTitle -> publisher: string,
+            kind: 'youtube#video'
+        }
+        """
+        result = dict()
+        snippet = item['snippet']
+        result['kind'] = 'youtube#video'
+        result['external_id'] = snippet['resourceId']['videoId']
+        result['published_at'] = snippet['publishedAt']
+        result['publisher'] = snippet['channelTitle']
+        result['title'] = snippet['title']
+        result['description'] = snippet['description']
+        result['thumbnails'] = snippet['thumbnails']
+
+        return result
+
+    def fetch_playlist_items(self, playlist_id, part='snippet', next_page_token='default'):
+        items = []
+        while next_page_token:
+            response = requests.get(
+                self.base_url + '/playlistItems',
+                params={
+                    'part': part,
+                    'playlistId': playlist_id,
+                    'maxResults': 50,
+                    'key': os.environ['YOUTUBE_API_KEY']
+                } if next_page_token == 'default' else {
+                    'part': part,
+                    'playlistId': playlist_id,
+                    'maxResults': 50,
+                    'pageToken': next_page_token,
+                    'key': os.environ['YOUTUBE_API_KEY']
+                }
+            ).json()
+
+            items.append(response['items'])
+            try:
+                next_page_token = response['nextPageToken']
+            except KeyError:
+                next_page_token = None
+
+        return reduce(lambda l, r: l + r, items)
+
+
+if __name__ == '__main__':
+    # res = fetch_playlist(playlist_id='PLoABXt5mipg4vxLw0NsRQLDDVBpOkshzF')
+    # print(res)
+
+
+    a = {}
+    b = {1: 2}
+    c = {3: 4}
+    print({5: 6, **b, **a})
+    if {}:
+        print('yes')
