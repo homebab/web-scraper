@@ -7,7 +7,7 @@ from urllib.error import HTTPError
 import boto3
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 
-from scrapers.ancestor import SeleniumScraper
+from app.main.scrapers.ancestor import SeleniumScraper
 from utils.function import take, add
 from utils.string import get_digits_from_str, get_float_from_str
 

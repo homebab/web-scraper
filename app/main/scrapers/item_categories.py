@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
-from scrapers.ancestor import SeleniumScraper
+from app.main.scrapers.ancestor import SeleniumScraper
 
 
 class ItemCategoriesScraper(SeleniumScraper):

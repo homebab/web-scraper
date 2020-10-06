@@ -1,6 +1,6 @@
 from abc import ABC
 
-from scrapers.ancestor import SeleniumScraper
+from app.main.scrapers.ancestor import SeleniumScraper
 
 
 class ItemScraper(SeleniumScraper):

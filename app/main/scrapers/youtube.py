@@ -1,15 +1,10 @@
-import json
-import multiprocessing as mp
 import os
-import re
 import uuid
 from datetime import datetime
 from functools import reduce
 from time import sleep
-from typing import List
 
 import requests
-from bs4 import BeautifulSoup as bs
 from flask_restx import abort
 from joblib import dump, load
 from selenium.webdriver.common.by import By
@@ -17,7 +12,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
-from scrapers.ancestor import SeleniumScraper
+from app.main.scrapers.ancestor import SeleniumScraper
 from utils.encoder import DateTimeEncoder
 from utils.s3_manager.manage import S3Manager
 
