@@ -41,6 +41,7 @@ class S3Manager:
         :return:
         """
         # filter
+        print(key)
         objs_list = self.fetch_objs_list(prefix=key)
         filtered = list(filter(lambda o: o.size > 0 and conversion_type in o.key, objs_list))
 

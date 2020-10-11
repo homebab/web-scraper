@@ -23,14 +23,14 @@ class YoutubeRecipe(Resource):
         self.logger = init_logger()
 
         self.bucket_name = 'omtm-production'
-        self.key = lambda s: "scraper/youtube_recipes/{source}.json".format(source=s)
+        self.key = lambda s: "scraper/youtube_recipes/{source}".format(source=s)
 
     def validate_arg(self, key):
         try:
             return request.args[key]
         except KeyError:
             self.logger.debug('[omtm]: no query parameter')
-            raise KeyError
+            return None
 
     @Youtube.doc(params={
         'playlist-id': {
@@ -42,7 +42,11 @@ class YoutubeRecipe(Resource):
         """ get youtube recipes from s3 """
         playlist_id = self.validate_arg(key='playlist-id')
 
-        data = S3Manager(bucket_name=self.bucket_name).fetch_dict_from_json(key=self.key(s=playlist_id))
+        data = S3Manager(
+            bucket_name=self.bucket_name
+        ).fetch_dict_from_json(
+            key=self.key(s=playlist_id if playlist_id else "")
+        )
         if data is None:
             return 'there is no data'
         return data
@@ -57,15 +61,17 @@ class YoutubeRecipe(Resource):
         """ scrape and upload youtube recipes to s3 """
 
         playlist_id = self.validate_arg(key='playlist-id')
+        if not playlist_id:
+            raise KeyError
 
         res = YoutubeDataAPIHandler(
             bucket_name=self.bucket_name,
-            key=self.key(s=playlist_id),
+            key=self.key(s=playlist_id) + ".json"
         ).process(
             playlist_id=playlist_id
         )
 
-        return json.dumps(res, cls=DateTimeEncoder)
+        return json.dumps(res, cls=DateTimeEncoder, ensure_ascii=False)
 
 # @YoutubeRecipe.route('/baek')
 # class BaekRecipe(Resource):

@@ -248,13 +248,13 @@ class YoutubeDataAPIHandler:
         """
         items = self.fetch_playlist_items(playlist_id=playlist_id, youtube_api_key=youtube_api_key)
         transformed = list(map(self.transform, items))
-        # data = {
-        #     'created_at': datetime.now(),
-        #     'total_num': len(transformed),
-        #     'data': transformed
-        # }
-        self.s3_manager.save_dict_to_json(transformed, key=self.key, encoder=DateTimeEncoder)
-        return transformed
+        data = {
+            'created_at': datetime.now(),
+            'total_num': len(transformed),
+            'data': transformed
+        }
+        self.s3_manager.save_dict_to_json(data, key=self.key, encoder=DateTimeEncoder)
+        return data
 
     @staticmethod
     def transform(item):
