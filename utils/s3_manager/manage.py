@@ -1,6 +1,7 @@
 import json
 import tempfile
 from io import StringIO, BytesIO
+from typing import List, Dict
 
 import boto3
 import matplotlib.pyplot as plt
@@ -89,7 +90,7 @@ class S3Manager:
             ))
             return True
 
-    def save_dict_to_json(self, data: dict, key: str, encoder=None):
+    def save_dict_to_json(self, data: Dict or List, key: str, encoder=None):
         serialized_data = json.dumps(data, ensure_ascii=False, cls=encoder)
         return self.save_object(key=key, body=serialized_data)
 

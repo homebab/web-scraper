@@ -11,19 +11,28 @@
 ```
 
 ## Get Started
+- run app
 swagger: http://localhost:9000/
 ```
-python api/app.py
+python manager.py run
 ```
-### setup on Mac
+- test
+```
+python manager.py test
+```
+## Setup on Mac
+### chromedriver
 - install chromedriver
 ```shell script
 brew install chromedriver
 brew install Caskroom/versions/google-chrome-canary
 ```
 - set environment variable `$CHORME_DRIVER`. ex `/usr/local/bin/chromedriver`
+### aws configure
 - aws configure with ur IAM Key
 ```shell script
 # if you don't have awscli, pip install awscli
 aws configure
 ```
+### youtube api key
+- set environment variable `$YOUTUBE_API_KEY`

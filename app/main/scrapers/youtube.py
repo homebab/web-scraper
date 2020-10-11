@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 from datetime import datetime
@@ -238,22 +239,22 @@ class YoutubeDataAPIHandler:
 
         pass
 
-    def process(self, playlist_id):
+    def process(self, playlist_id, youtube_api_key=None):
         """
             1. fetch items on the playlist from Youtube
             2. transform response
             3. upload to S3
         :return:
         """
-        items = self.fetch_playlist_items(playlist_id=playlist_id)
+        items = self.fetch_playlist_items(playlist_id=playlist_id, youtube_api_key=youtube_api_key)
         transformed = list(map(self.transform, items))
-        data = {
-            'created_at': datetime.now(),
-            'total_num': len(transformed),
-            'data': transformed
-        }
-        self.s3_manager.save_dict_to_json(data, key=self.key, encoder=DateTimeEncoder)
-        return data
+        # data = {
+        #     'created_at': datetime.now(),
+        #     'total_num': len(transformed),
+        #     'data': transformed
+        # }
+        self.s3_manager.save_dict_to_json(transformed, key=self.key, encoder=DateTimeEncoder)
+        return transformed
 
     @staticmethod
     def transform(item):
@@ -307,7 +308,7 @@ class YoutubeDataAPIHandler:
 
         return result
 
-    def fetch_playlist_items(self, playlist_id, part='snippet', next_page_token='default'):
+    def fetch_playlist_items(self, playlist_id, youtube_api_key=None, part='snippet', next_page_token='default'):
         items = []
         while next_page_token:
             response = requests.get(
@@ -316,13 +317,13 @@ class YoutubeDataAPIHandler:
                     'part': part,
                     'playlistId': playlist_id,
                     'maxResults': 50,
-                    'key': os.environ['YOUTUBE_API_KEY']
+                    'key': youtube_api_key if youtube_api_key else os.environ['YOUTUBE_API_KEY']
                 } if next_page_token == 'default' else {
                     'part': part,
                     'playlistId': playlist_id,
                     'maxResults': 50,
                     'pageToken': next_page_token,
-                    'key': os.environ['YOUTUBE_API_KEY']
+                    'key': youtube_api_key if youtube_api_key else os.environ['YOUTUBE_API_KEY']
                 }
             ).json()
 

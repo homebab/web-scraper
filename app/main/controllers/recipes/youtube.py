@@ -1,7 +1,7 @@
 import json
 
 from flask import request
-from flask_restx import Resource, abort, Namespace
+from flask_restx import Resource, abort, Namespace, fields
 
 from app.main.scrapers.youtube import YoutubeDataAPIHandler, BaekRecipeScraper
 from utils.encoder import DateTimeEncoder
