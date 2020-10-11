@@ -14,7 +14,7 @@ Youtube = Namespace(
 )
 
 
-@Youtube.route('/')
+@Youtube.route('')
 class YoutubeRecipe(Resource):
     def __init__(self, *args, **kwargs):
 
