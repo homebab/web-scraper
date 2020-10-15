@@ -13,8 +13,13 @@ def create_app():
     file.close()
 
     app = Flask(__name__, template_folder='../static')
+
+    app.config['JSON_AS_ASCII'] = False
+    app.config['JSON_SORT_KEYS'] = False
+
     api = Api(
         app,
+        doc="/docs",
         version='0.1.0',
         title="밥심 Scraper API",
         description=description,
@@ -25,8 +30,5 @@ def create_app():
     api.add_namespace(Youtube, '/recipes/youtube')
     api.add_namespace(Category, '/categories')
     # api.add_namespace(Grocery, '/items')
-
-    app.config['JSON_AS_ASCII'] = False
-    app.config['JSON_SORT_KEYS'] = False
 
     return app
