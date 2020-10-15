@@ -34,5 +34,6 @@ brew install Caskroom/versions/google-chrome-canary
 # if you don't have awscli, pip install awscli
 aws configure
 ```
+- OR set env `$AWS_ACCESS_KEY_ID`, `$AWS_SECRET_ACCESS_KEY`
 ### youtube api key
 - set environment variable `$YOUTUBE_API_KEY`
