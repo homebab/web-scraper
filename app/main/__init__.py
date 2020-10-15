@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_restx import Api
 
-from app.main.controllers.item_categories import Category
-from app.main.controllers.recipes.general import GeneralRecipe
-from app.main.controllers.recipes.youtube import Youtube
+from app.main.handlers.item_categories import Category
+from app.main.handlers.recipes.general import GeneralRecipe
+from app.main.handlers.recipes.youtube import Youtube
 
 
 def create_app():
