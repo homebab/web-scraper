@@ -19,7 +19,8 @@ def create_app():
 
     api = Api(
         app,
-        doc="/docs",
+        prefix="/omtm/scraper",
+        doc="/omtm/scraper/docs",
         version='0.1.0',
         title="밥심 Scraper API",
         description=description,
