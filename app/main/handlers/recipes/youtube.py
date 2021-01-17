@@ -42,11 +42,8 @@ class YoutubeRecipe(Resource):
         """ get youtube recipes from s3 """
         playlist_id = self.validate_arg(key='playlist-id')
 
-        data = S3Manager(
-            bucket_name=self.bucket_name
-        ).fetch_dict_from_json(
-            key=self.key(s=playlist_id if playlist_id else "")
-        )
+        data = S3Manager(bucket_name=self.bucket_name) \
+            .fetch_dict_from_json(key=self.key(s=playlist_id if playlist_id else ""))
         if data is None:
             return 'there is no data'
         return data
