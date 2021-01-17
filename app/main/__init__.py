@@ -22,7 +22,7 @@ def create_app():
         prefix="/web-scraper",
         doc="/web-scraper/swagger-ui",
         version='0.1.0',
-        title="밥심 Scraper API",
+        title="HOMEBAB - Web Scraper API Serivce",
         description=description,
         license="ⓒ 2020 TRAIN-J All rights reserved."
     )
